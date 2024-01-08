@@ -1,4 +1,4 @@
-package com.elliott.TwoRoomsAndABoom;
+package com.elliott.tworoomsandaboom;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,5 +9,4 @@ public class TwoRoomsAndABoomApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TwoRoomsAndABoomApplication.class, args);
 	}
-
 }
