@@ -122,14 +122,25 @@ public class TwoRoomsAndABoomController
             throw new GameRuleException("Too many players (no more than 30)");
 
         BasicCards basicCards = twoRoomsAndABoomDAO.getBasicCards();
-        //List<Card> activeCards = getActiveCards();
+        List<Card> activeCards = twoRoomsAndABoomDAO.getActiveCards();
 
         List<Card> unassignedCards = new ArrayList<>();
         unassignedCards.add(basicCards.getPresident());
         unassignedCards.add(basicCards.getBomber());
-        if (numberOfPlayers % 2 > 0)
+        boolean setGambler = true;
+        for (Card card : activeCards)
+        {
+            if (card.getTeamId() == 3)
+            {
+                setGambler = false;
+                break;
+            }
+        }
+
+        if (numberOfPlayers % 2 > 0 && setGambler)
             unassignedCards.add(basicCards.getGambler());
 
+        unassignedCards.addAll(activeCards);
         while (unassignedCards.size() < numberOfPlayers)
         {
             unassignedCards.add(basicCards.getBlueTeam());
