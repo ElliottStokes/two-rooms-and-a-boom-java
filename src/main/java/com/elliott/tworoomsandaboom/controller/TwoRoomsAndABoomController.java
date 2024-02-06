@@ -14,6 +14,7 @@ import com.elliott.tworoomsandaboom.card.BasicCards;
 import com.elliott.tworoomsandaboom.card.Card;
 import com.elliott.tworoomsandaboom.dao.TwoRoomsAndABoomDAO;
 import com.elliott.tworoomsandaboom.error.GameRuleException;
+import com.elliott.tworoomsandaboom.game.GameOperations;
 import com.elliott.tworoomsandaboom.player.Player;
 import com.elliott.tworoomsandaboom.player.RegisterPlayer;
 
@@ -41,11 +42,13 @@ import lombok.extern.slf4j.Slf4j;
 public class TwoRoomsAndABoomController
 {
     private final TwoRoomsAndABoomDAO twoRoomsAndABoomDAO;
+    private final GameOperations gameOperations;
 
     @Autowired
-    public TwoRoomsAndABoomController(TwoRoomsAndABoomDAO twoRoomsAndABoomDAO)
+    public TwoRoomsAndABoomController(TwoRoomsAndABoomDAO twoRoomsAndABoomDAO, GameOperations gameOperations)
     {
         this.twoRoomsAndABoomDAO = twoRoomsAndABoomDAO;
+        this.gameOperations = gameOperations;
     }
     @PostMapping(value = "/join",
                  consumes = { MediaType.APPLICATION_JSON_VALUE })
@@ -114,46 +117,9 @@ public class TwoRoomsAndABoomController
     public ResponseEntity<Map<Player, Card>> assignCards()
     {
         Player[] players = twoRoomsAndABoomDAO.getPlayers();
-        int numberOfPlayers = players.length;
-
-        if (numberOfPlayers < 6)
-            throw new GameRuleException("Not enough players (need more than 6)");
-        if (numberOfPlayers > 30)
-            throw new GameRuleException("Too many players (no more than 30)");
-
         BasicCards basicCards = twoRoomsAndABoomDAO.getBasicCards();
         List<Card> activeCards = twoRoomsAndABoomDAO.getActiveCards();
-
-        List<Card> unassignedCards = new ArrayList<>();
-        unassignedCards.add(basicCards.getPresident());
-        unassignedCards.add(basicCards.getBomber());
-        boolean setGambler = true;
-        for (Card card : activeCards)
-        {
-            if (card.getTeamId() == 3)
-            {
-                setGambler = false;
-                break;
-            }
-        }
-
-        if (numberOfPlayers % 2 > 0 && setGambler)
-            unassignedCards.add(basicCards.getGambler());
-
-        unassignedCards.addAll(activeCards);
-        while (unassignedCards.size() < numberOfPlayers)
-        {
-            unassignedCards.add(basicCards.getBlueTeam());
-            unassignedCards.add(basicCards.getRedTeam());
-        }
-
-        ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
-        Map<Player, Card> assignedCards = new LinkedHashMap<>();
-        for (Player player : players)
-        {
-            int cardIndex = threadLocalRandom.nextInt(0, unassignedCards.size());
-            assignedCards.put(player, unassignedCards.remove(cardIndex));
-        }
+        Map<Player, Card> assignedCards = gameOperations.dealCards(players, basicCards, activeCards);
         log.info("Assigned cards: {}", assignedCards);
         twoRoomsAndABoomDAO.saveAssignedCards(assignedCards);
         return ResponseEntity.ok(assignedCards);
