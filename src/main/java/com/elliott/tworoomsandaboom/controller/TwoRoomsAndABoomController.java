@@ -113,6 +113,14 @@ public class TwoRoomsAndABoomController
         return ResponseEntity.status(HttpStatus.CREATED).body("");
     }
 
+    @GetMapping(value = "/clearActiveCards")
+    public ResponseEntity<String> clearActiveCards()
+    {
+        log.info("Clearing Active Cards");
+        twoRoomsAndABoomDAO.removeActiveCards();
+        return ResponseEntity.status(HttpStatus.OK).body("");
+    }
+
     @GetMapping("/assignCards")
     public ResponseEntity<Map<Player, Card>> assignCards()
     {
