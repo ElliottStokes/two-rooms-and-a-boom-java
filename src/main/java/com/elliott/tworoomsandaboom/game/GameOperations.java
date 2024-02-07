@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 import com.elliott.tworoomsandaboom.card.BasicCards;
 import com.elliott.tworoomsandaboom.card.Card;
@@ -13,6 +14,9 @@ import com.elliott.tworoomsandaboom.player.Player;
 
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class GameOperations
 {
@@ -28,7 +32,7 @@ public class GameOperations
         List<Card> unassignedCards = new ArrayList<>();
         unassignedCards.add(basicCards.getPresident());
         unassignedCards.add(basicCards.getBomber());
-        if (numberOfPlayers % 2 > 0 && activeCards.stream().anyMatch(card -> card.getCardId() == 3))
+        if (numberOfPlayers % 2 > 0 && activeCards.stream().noneMatch(card -> card.getTeamId() == 3))
             unassignedCards.add(basicCards.getGambler());
 
         unassignedCards.addAll(activeCards);
@@ -36,6 +40,15 @@ public class GameOperations
         {
             unassignedCards.add(basicCards.getBlueTeam());
             unassignedCards.add(basicCards.getRedTeam());
+        }
+
+        if (numberOfPlayers != unassignedCards.size())
+        {
+            log.error("Too many cards active (" + unassignedCards.size() + "), currently: " +
+                              unassignedCards.stream()
+                                             .map(Card::getTitle)
+                                             .collect(Collectors.joining(", ")));
+            throw new GameRuleException("Too many cards active");
         }
 
         ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
