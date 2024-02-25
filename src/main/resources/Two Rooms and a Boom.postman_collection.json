@@ -1,0 +1,112 @@
+{
+	"info": {
+		"_postman_id": "f9897186-fd65-473a-bcdb-9016df86b56c",
+		"name": "Two Rooms and a Boom",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33191086"
+	},
+	"item": [
+		{
+			"name": "Join",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"Chelsea\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/join",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"join"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Card",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Get Card Image",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Set Active Cards",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Clear Active Cards",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Assign Cards",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/assignCards",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"assignCards"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "192.168.1.17:8080/two-rooms-and-a-boom",
+			"type": "string"
+		}
+	]
+}
