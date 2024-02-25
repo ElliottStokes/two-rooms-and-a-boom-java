@@ -102,3 +102,13 @@ INSERT IGNORE INTO card (cardTitle, teamId, fileName) VALUES
 ("Usurper", @blueTeamId, "Usurper.png"),
 ("Usurper", @redTeamId, "Usurper.png"),
 ("Zombie", @wildTeamId, "Zombie.png");
+
+SET @redTeamCardId = (SELECT cardId FROM card WHERE cardTitle = "Red Team");
+SET @blueTeamCardId = (SELECT cardId FROM card WHERE cardTitle = "Blue Team");
+SET @presidentCardId = (SELECT cardId FROM card WHERE cardTitle = "President");
+SET @bomberCardId = (SELECT cardId FROM card WHERE cardTitle = "Bomber");
+SET @gamblerCardId = (SELECT cardId FROM card WHERE cardTitle = "Gambler");
+
+UPDATE card SET isBasic = 1, isActive = 1 WHERE cardId IN (
+    @redTeamCardId, @blueTeamCardId, @presidentCardId, @bomberCardId, @gamblerCardId
+);
