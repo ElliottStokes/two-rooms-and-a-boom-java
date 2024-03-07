@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.elliott.tworoomsandaboom.card.ActiveCards;
+import com.elliott.tworoomsandaboom.card.ActiveCardIds;
+import com.elliott.tworoomsandaboom.card.ActiveCardNames;
 import com.elliott.tworoomsandaboom.card.BasicCards;
 import com.elliott.tworoomsandaboom.card.Card;
 import com.elliott.tworoomsandaboom.dao.TwoRoomsAndABoomDAO;
@@ -83,10 +84,20 @@ public class TwoRoomsAndABoomControllerTest
     }
 
     @Test
-    void shouldReturnCreatedStatusOnSetCardsEndpoint()
+    void shouldReturnCreatedStatusOnSetCardsWithIdsEndpoint()
     {
         int[] activeCardIds = new int[] {1, 2, 3, 4};
-        ActiveCards activeCards = new ActiveCards(activeCardIds);
+        ActiveCardIds activeCards = new ActiveCardIds(activeCardIds);
+        ResponseEntity<String> response = twoRoomsAndABoomController.setActiveCards(activeCards);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("", response.getBody());
+    }
+
+    @Test
+    void shouldReturnCreatedStatusOnSetCardsWithNamesEndpoint()
+    {
+        String[] activeCardNames = new String[] {"Angel", "Blind", "Agoraphobe"};
+        ActiveCardNames activeCards = new ActiveCardNames(activeCardNames);
         ResponseEntity<String> response = twoRoomsAndABoomController.setActiveCards(activeCards);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("", response.getBody());
