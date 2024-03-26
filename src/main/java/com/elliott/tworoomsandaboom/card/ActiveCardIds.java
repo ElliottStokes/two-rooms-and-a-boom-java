@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ActiveCardIds implements ActiveCards
 {
-    private static final String conditionColumn = "cardId";
-
     private int[] activeCardIds;
 
     public String getDatabaseInput()
@@ -19,11 +17,6 @@ public class ActiveCardIds implements ActiveCards
         return Arrays.stream(activeCardIds)
                 .mapToObj(Integer::toString)
                 .collect(Collectors.joining(", "));
-    }
-
-    @Override
-    public String getConditionColumn() {
-        return conditionColumn;
     }
 
     public int[] getActiveCardIds()

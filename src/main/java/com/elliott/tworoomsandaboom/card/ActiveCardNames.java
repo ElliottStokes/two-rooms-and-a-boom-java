@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ActiveCardNames implements ActiveCards {
-    private static final String conditionColumn = "cardTitle";
-
     private String[] activeCardNames;
 
     @Override
@@ -18,12 +16,6 @@ public class ActiveCardNames implements ActiveCards {
         return Arrays.stream(activeCardNames)
                 .map(name -> "\"" + name + "\"")
                 .collect(Collectors.joining(", "));
-    }
-
-    @Override
-    public String getConditionColumn()
-    {
-        return conditionColumn;
     }
 
     public String[] getActiveCardNames()
