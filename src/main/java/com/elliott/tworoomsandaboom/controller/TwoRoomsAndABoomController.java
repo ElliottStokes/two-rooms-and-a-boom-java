@@ -3,17 +3,15 @@ package com.elliott.tworoomsandaboom.controller;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
-import com.elliott.tworoomsandaboom.card.ActiveCards;
+import com.elliott.tworoomsandaboom.card.ActiveCardIds;
+import com.elliott.tworoomsandaboom.card.ActiveCardNames;
 import com.elliott.tworoomsandaboom.card.BasicCards;
 import com.elliott.tworoomsandaboom.card.Card;
 import com.elliott.tworoomsandaboom.dao.TwoRoomsAndABoomDAO;
-import com.elliott.tworoomsandaboom.error.GameRuleException;
 import com.elliott.tworoomsandaboom.game.GameOperations;
 import com.elliott.tworoomsandaboom.player.Player;
 import com.elliott.tworoomsandaboom.player.RegisterPlayer;
@@ -101,15 +99,27 @@ public class TwoRoomsAndABoomController
                 .body(image);
     }
 
-    @PutMapping(value = "/setCards",
+    @PutMapping(value = "/setCards/id",
                 consumes = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<String> setActiveCards(
             @RequestBody
-            ActiveCards activeCards
+            ActiveCardIds activeCardIds
     )
     {
-        log.info("Set Active Cards: {}", activeCards.getActiveCardIds());
-        twoRoomsAndABoomDAO.setActiveCards(activeCards);
+        log.info("Set Active Cards: {}", activeCardIds.getActiveCardIds());
+        twoRoomsAndABoomDAO.setActiveCards(activeCardIds);
+        return ResponseEntity.status(HttpStatus.CREATED).body("");
+    }
+
+    @PutMapping(value = "/setCards/name",
+            consumes = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<String> setActiveCards(
+            @RequestBody
+            ActiveCardNames activeCardNames
+    )
+    {
+        log.info("Set Active Cards: {}", Arrays.toString(activeCardNames.getActiveCardNames()));
+        twoRoomsAndABoomDAO.setActiveCards(activeCardNames);
         return ResponseEntity.status(HttpStatus.CREATED).body("");
     }
 

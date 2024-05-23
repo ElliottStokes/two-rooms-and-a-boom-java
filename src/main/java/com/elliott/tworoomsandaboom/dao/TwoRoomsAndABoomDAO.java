@@ -5,23 +5,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
+import com.elliott.tworoomsandaboom.card.ActiveCardIds;
+import com.elliott.tworoomsandaboom.card.ActiveCardNames;
 import com.elliott.tworoomsandaboom.card.ActiveCards;
 import com.elliott.tworoomsandaboom.card.BasicCards;
 import com.elliott.tworoomsandaboom.card.Card;
 import com.elliott.tworoomsandaboom.db.DatabaseConnectionManager;
 import com.elliott.tworoomsandaboom.error.DatabaseException;
-import com.elliott.tworoomsandaboom.error.GameRuleException;
 import com.elliott.tworoomsandaboom.player.Player;
 import com.elliott.tworoomsandaboom.player.RegisterPlayer;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +33,8 @@ public class TwoRoomsAndABoomDAO
     private static final String RESET_ACTIVE_CARDS = "UPDATE card SET isActive = 0 WHERE isActive = 1 AND isBasic = 0;";
     private static final String ADD_ASSIGNED_CARDS = "INSERT INTO game (playerId, cardId) VALUES %s;";
     private static final String CLEAR_ASSIGNED_CARDS = "DELETE FROM game";
-    private static final String SET_ACTIVE_CARDS = "UPDATE card SET isActive = 1 WHERE cardId IN (%s);";
+    private static final String SET_ACTIVE_CARDS_BY_TITLE = "UPDATE card SET isActive = 1 WHERE cardTitle IN (%s);";
+    private static final String SET_ACTIVE_CARDS_BY_ID = "UPDATE card SET isActive = 1 WHERE cardId IN (%s);";
     private static final String GET_ACTIVE_CARDS = "SELECT cardId, teamId, cardTitle FROM card WHERE isActive = 1 AND isBasic = 0;";
     private static final String GET_BASIC_CARDS = "SELECT cardId, teamId, cardTitle FROM card WHERE isActive = 1 AND isBasic = 1;";
     private static final String GET_CARD_BY_NAME_AND_TEAM = "SELECT c.cardId, c.cardTitle, t.teamId, c.isActive FROM card c LEFT JOIN team t ON c.teamId = t.teamId WHERE c.cardTitle = ? AND t.colour = ?;";
@@ -118,12 +116,22 @@ public class TwoRoomsAndABoomDAO
         }
     }
 
-    public void setActiveCards(ActiveCards activeCards)
+    public void setActiveCards(ActiveCardNames activeCardNames)
+    {
+        setActiveCards(activeCardNames, SET_ACTIVE_CARDS_BY_TITLE);
+    }
+
+    public void setActiveCards(ActiveCardIds activeCardIds)
+    {
+        setActiveCards(activeCardIds, SET_ACTIVE_CARDS_BY_ID);
+    }
+
+    private void setActiveCards(ActiveCards activeCards, String query)
     {
         removeActiveCards();
-        String setActiveCardsFormatted = String.format(SET_ACTIVE_CARDS, activeCards.getDatabaseInput());
+        String formattedSql = String.format(query, activeCards.getDatabaseInput());
         try (Connection connection = databaseConnectionManager.getConnection();
-                PreparedStatement statement = connection.prepareStatement(setActiveCardsFormatted))
+             PreparedStatement statement = connection.prepareStatement(formattedSql))
         {
             log.info(statement.toString());
             statement.execute();
