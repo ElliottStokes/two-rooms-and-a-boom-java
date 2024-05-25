@@ -137,4 +137,28 @@ public class TwoRoomsAndABoomControllerTest
         assertTrue(assignedCards.containsValue(CardConstants.BLUE_TEAM_CARD));
         assertFalse(assignedCards.containsValue(CardConstants.GAMBLER_CARD));
     }
+
+    @Test
+    void shouldReturnOkWhenCheckingCredentialsOfExistingPlayer()
+    {
+        int playerId = 1;
+        String username = "testPlayer";
+
+        when(twoRoomsAndABoomDaoMock.checkCredentials(playerId, username)).thenReturn(true);
+
+        ResponseEntity<String> response = twoRoomsAndABoomController.checkCredentials(playerId, username);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenCheckingCredentialsOfNonExistingPlayer()
+    {
+        int playerId = 2;
+        String username = "NotRealPlayer";
+
+        when(twoRoomsAndABoomDaoMock.checkCredentials(playerId, username)).thenReturn(false);
+
+        ResponseEntity<String> response = twoRoomsAndABoomController.checkCredentials(playerId, username);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
 }

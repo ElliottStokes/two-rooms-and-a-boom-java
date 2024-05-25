@@ -28,7 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 public class TwoRoomsAndABoomDAO
 {
     private static final String CREATE_NEW_PLAYER = "INSERT INTO player (username) VALUES (?);";
-    private static final String SELECT_PLAYER = "SELECT playerId, username FROM player WHERE username = ?;";
+    private static final String SELECT_PLAYER_BY_USERNAME = "SELECT playerId, username FROM player WHERE username = ?;";
+    private static final String SELECT_PLAYER_BY_PLAYER_ID = "SELECT playerId, username FROM player WHERE playerId = ?;";
     private static final String SELECT_ALL_PLAYERS = "SELECT playerId, username FROM player;";
     private static final String RESET_ACTIVE_CARDS = "UPDATE card SET isActive = 0 WHERE isActive = 1 AND isBasic = 0;";
     private static final String ADD_ASSIGNED_CARDS = "INSERT INTO game (playerId, cardId) VALUES %s;";
@@ -71,7 +72,7 @@ public class TwoRoomsAndABoomDAO
         }
 
         try (Connection connection = databaseConnectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER))
+             PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER_BY_USERNAME))
         {
             statement.setString(1, newPlayer.getUsername());
             ResultSet resultSet = statement.executeQuery();
@@ -280,5 +281,21 @@ public class TwoRoomsAndABoomDAO
         {
             throw new DatabaseException(e.getMessage());
         }
+    }
+
+    public boolean checkCredentials(int playerId, String username) {
+        try (Connection connection = databaseConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER_BY_PLAYER_ID))
+        {
+            statement.setInt(1, playerId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next())
+                return resultSet.getString("username").equals(username);
+        }
+        catch (SQLException e)
+        {
+            throw new DatabaseException(e.getMessage());
+        }
+        return false;
     }
 }
