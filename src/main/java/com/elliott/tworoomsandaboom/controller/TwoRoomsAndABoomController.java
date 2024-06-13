@@ -142,4 +142,21 @@ public class TwoRoomsAndABoomController
         twoRoomsAndABoomDAO.saveAssignedCards(assignedCards);
         return ResponseEntity.ok(assignedCards);
     }
+
+    @GetMapping("/player/checkCredentials")
+    public ResponseEntity<String> checkCredentials(
+            @RequestParam("playerId")
+            int playerId,
+            @RequestParam("username")
+            String username
+    ) {
+        boolean isValidPlayer = twoRoomsAndABoomDAO.checkCredentials(playerId, username);
+        log.info("Checking credentials for player [playerId: {}, username: {}]: {}", playerId, username, isValidPlayer);
+
+        if (isValidPlayer) {
+            return ResponseEntity.ok().body("");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("");
+        }
+    }
 }
