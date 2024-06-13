@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TwoRoomsAndABoomDAO
 {
     private static final String CREATE_NEW_PLAYER = "INSERT INTO player (username) VALUES (?);";
+    private static final String DELETE_PLAYER_BY_PLAYER_ID = "DELETE FROM player WHERE playerId = ?;";
     private static final String SELECT_PLAYER_BY_USERNAME = "SELECT playerId, username FROM player WHERE username = ?;";
     private static final String SELECT_PLAYER_BY_PLAYER_ID = "SELECT playerId, username FROM player WHERE playerId = ?;";
     private static final String SELECT_ALL_PLAYERS = "SELECT playerId, username FROM player;";
@@ -85,6 +86,20 @@ public class TwoRoomsAndABoomDAO
             throw new DatabaseException(e.getMessage());
         }
         return null;
+    }
+
+    public void deletePlayer(int playerId)
+    {
+        try (Connection connection = databaseConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(DELETE_PLAYER_BY_PLAYER_ID))
+        {
+            statement.setInt(1, playerId);
+            statement.execute();
+        }
+        catch (SQLException e)
+        {
+            throw new DatabaseException(e.getMessage());
+        }
     }
 
     public Optional<Player> getPlayerDetailsFromUsername(String username) {

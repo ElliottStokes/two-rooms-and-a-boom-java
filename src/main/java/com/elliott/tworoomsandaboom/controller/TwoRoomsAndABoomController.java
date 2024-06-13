@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -175,5 +176,24 @@ public class TwoRoomsAndABoomController
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("");
         }
+    }
+
+    @GetMapping("/player/listAll")
+    public ResponseEntity<Player[]> listAllPlayers()
+    {
+        Player[] players = twoRoomsAndABoomDAO.getPlayers();
+        log.info("Listing all players: {}", players);
+        return ResponseEntity.ok(players);
+    }
+
+    @DeleteMapping("/player/delete")
+    public ResponseEntity<String> deletePlayer(
+            @RequestParam("playerId")
+            int playerId
+    )
+    {
+        log.info("Deleting player: {}", playerId);
+        twoRoomsAndABoomDAO.deletePlayer(playerId);
+        return ResponseEntity.ok().body("");
     }
 }
