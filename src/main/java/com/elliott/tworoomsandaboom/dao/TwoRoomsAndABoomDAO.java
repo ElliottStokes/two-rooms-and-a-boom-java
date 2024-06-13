@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.elliott.tworoomsandaboom.card.ActiveCardIds;
 import com.elliott.tworoomsandaboom.card.ActiveCardNames;
@@ -84,6 +85,25 @@ public class TwoRoomsAndABoomDAO
             throw new DatabaseException(e.getMessage());
         }
         return null;
+    }
+
+    public Optional<Player> getPlayerDetailsFromUsername(String username) {
+        try (Connection connection = databaseConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER_BY_USERNAME))
+        {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next())
+                return Optional.of(new Player(
+                        resultSet.getInt("playerId"),
+                        resultSet.getString("username")
+                ));
+        }
+        catch (SQLException e)
+        {
+            throw new DatabaseException(e.getMessage());
+        }
+        return Optional.empty();
     }
 
     public Player[] getPlayers()
