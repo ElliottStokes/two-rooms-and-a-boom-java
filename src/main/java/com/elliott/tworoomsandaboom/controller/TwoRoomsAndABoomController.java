@@ -152,6 +152,14 @@ public class TwoRoomsAndABoomController
         return ResponseEntity.ok(assignedCards);
     }
 
+    @GetMapping("/endGame")
+    public ResponseEntity<String> endGame()
+    {
+        log.info("Ending Game");
+        twoRoomsAndABoomDAO.clearAssignedCards();
+        return ResponseEntity.ok().body("");
+    }
+
     @GetMapping("/player/checkCredentials")
     public ResponseEntity<String> checkCredentials(
             @RequestParam("playerId")
