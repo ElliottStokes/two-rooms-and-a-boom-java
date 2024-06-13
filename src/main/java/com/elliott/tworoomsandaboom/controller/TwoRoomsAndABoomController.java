@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.elliott.tworoomsandaboom.card.ActiveCardIds;
 import com.elliott.tworoomsandaboom.card.ActiveCardNames;
@@ -52,13 +53,21 @@ public class TwoRoomsAndABoomController
                  consumes = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<Player> registerNewPlayer(
             @RequestBody
-            RegisterPlayer newPlayer
+            RegisterPlayer player
     )
     {
-        log.info("Register New Player: {}", newPlayer.getUsername());
-        Player player = twoRoomsAndABoomDAO.createNewPlayer(newPlayer);
-        log.info("Created New Player [playerId: {}, username: {}]", player.getPlayerId(), player.getUsername());
-        return ResponseEntity.status(HttpStatus.CREATED).body(player);
+        log.info("Register Player: {}", player.getUsername());
+        Player playerDetails;
+        Optional<Player> existingPlayer = twoRoomsAndABoomDAO.getPlayerDetailsFromUsername(player.getUsername());
+        if (existingPlayer.isPresent()) {
+            playerDetails = existingPlayer.get();
+            log.info("Player already exists [playerId: {}, username: {}]", playerDetails.getPlayerId(), playerDetails.getUsername());
+            return ResponseEntity.status(HttpStatus.OK).body(playerDetails);
+        } else {
+            playerDetails = twoRoomsAndABoomDAO.createNewPlayer(player);
+            log.info("Created New Player [playerId: {}, username: {}]", playerDetails.getPlayerId(), playerDetails.getUsername());
+            return ResponseEntity.status(HttpStatus.CREATED).body(playerDetails);
+        }
     }
 
     @PutMapping("/ready")

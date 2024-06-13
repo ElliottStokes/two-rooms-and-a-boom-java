@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.elliott.tworoomsandaboom.card.ActiveCardIds;
 import com.elliott.tworoomsandaboom.card.ActiveCardNames;
@@ -58,6 +59,21 @@ public class TwoRoomsAndABoomControllerTest
         ResponseEntity<Player> response = twoRoomsAndABoomController.registerNewPlayer(player);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(player.getUsername(), response.getBody().getUsername());
+    }
+
+    @Test
+    void shouldReturnExistingPlayerDetailsWhenPlayerJoinsWithExistingUsername()
+    {
+        int playerId = 2;
+        String username = "existingPlayer";
+
+        when(twoRoomsAndABoomDaoMock.getPlayerDetailsFromUsername(username))
+                .thenReturn(Optional.of(new Player(playerId, username)));
+
+        ResponseEntity<Player> response = twoRoomsAndABoomController.registerNewPlayer(new RegisterPlayer(username));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(username, response.getBody().getUsername());
+        assertEquals(playerId, response.getBody().getPlayerId());
     }
 
     @Test
