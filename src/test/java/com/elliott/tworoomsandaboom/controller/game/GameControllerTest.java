@@ -1,0 +1,98 @@
+package com.elliott.tworoomsandaboom.controller.game;
+
+import com.elliott.tworoomsandaboom.card.ActiveCardIds;
+import com.elliott.tworoomsandaboom.card.ActiveCardNames;
+import com.elliott.tworoomsandaboom.card.BasicCards;
+import com.elliott.tworoomsandaboom.card.Card;
+import com.elliott.tworoomsandaboom.dao.game.GameDAO;
+import com.elliott.tworoomsandaboom.dao.player.PlayerDAO;
+import com.elliott.tworoomsandaboom.game.GameOperations;
+import com.elliott.tworoomsandaboom.player.Player;
+import com.elliott.tworoomsandaboom.util.CardConstants;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class GameControllerTest {
+    private GameController gameController;
+
+    @Mock
+    private GameDAO gameDaoMock;
+    @Mock
+    private PlayerDAO playerDaoMock;
+
+    @BeforeEach
+    void setUp()
+    {
+        gameController = new GameController(gameDaoMock, playerDaoMock, new GameOperations());
+    }
+
+    @Test
+    void shouldReturnCreatedStatusOnSetCardsWithIdsEndpoint()
+    {
+        int[] activeCardIds = new int[] {1, 2, 3, 4};
+        ActiveCardIds activeCards = new ActiveCardIds(activeCardIds);
+        ResponseEntity<String> response = gameController.setActiveCards(activeCards);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("", response.getBody());
+    }
+
+    @Test
+    void shouldReturnCreatedStatusOnSetCardsWithNamesEndpoint()
+    {
+        String[] activeCardNames = new String[] {"Angel", "Blind", "Agoraphobe"};
+        ActiveCardNames activeCards = new ActiveCardNames(activeCardNames);
+        ResponseEntity<String> response = gameController.setActiveCards(activeCards);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("", response.getBody());
+    }
+
+    @Test
+    void shouldReturnOkStatusAndAssignedCardsOnAssignCardsEndpoint()
+    {
+        Player[] players = new Player[]{
+                new Player(1, "testPlayer1"),
+                new Player(2, "testPlayer2"),
+                new Player(3, "testPlayer3"),
+                new Player(4, "testPlayer4"),
+                new Player(5, "testPlayer5"),
+                new Player(6, "testPlayer6")
+        };
+        List<Card> cards = new ArrayList<>();
+        cards.add(CardConstants.PRESIDENT_CARD);
+        cards.add(CardConstants.BOMBER_CARD);
+        cards.add(CardConstants.BLUE_TEAM_CARD);
+        cards.add(CardConstants.RED_TEAM_CARD);
+        cards.add(CardConstants.GAMBLER_CARD);
+        BasicCards basicCards = new BasicCards(cards);
+
+        when(playerDaoMock.getPlayers()).thenReturn(players);
+        when(gameDaoMock.getBasicCards()).thenReturn(basicCards);
+        when(gameDaoMock.getActiveCards()).thenReturn(new ArrayList<>());
+
+        ResponseEntity<Map<Player, Card>> response = gameController.assignCards();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        Map<Player, Card> assignedCards = response.getBody();
+        assertEquals(6, assignedCards.size());
+        assertTrue(assignedCards.containsValue(CardConstants.PRESIDENT_CARD));
+        assertTrue(assignedCards.containsValue(CardConstants.BOMBER_CARD));
+        assertTrue(assignedCards.containsValue(CardConstants.RED_TEAM_CARD));
+        assertTrue(assignedCards.containsValue(CardConstants.BLUE_TEAM_CARD));
+        assertFalse(assignedCards.containsValue(CardConstants.GAMBLER_CARD));
+    }
+}
