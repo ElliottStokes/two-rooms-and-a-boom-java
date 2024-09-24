@@ -31,6 +31,7 @@ CREATE TABLE `two_rooms_and_a_boom`.`game` (
     `gameId` INT NOT NULL AUTO_INCREMENT,
     `playerId` INT NOT NULL,
     `cardId` INT NOT NULL,
+    `room` ENUM('A', 'B') NOT NULL,
     PRIMARY KEY (`gameId`),
     INDEX `player_idx` (`playerId` ASC) VISIBLE,
     INDEX `card_idx` (`cardId` ASC) VISIBLE,

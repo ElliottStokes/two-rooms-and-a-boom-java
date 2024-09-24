@@ -62,7 +62,7 @@ public class GameControllerTest {
     }
 
     @Test
-    void shouldReturnOkStatusAndAssignedCardsOnAssignCardsEndpoint()
+    void shouldReturnOkStatusOnStartGameEndpoint()
     {
         Player[] players = new Player[]{
                 new Player(1, "testPlayer1"),
@@ -84,15 +84,7 @@ public class GameControllerTest {
         when(gameDaoMock.getBasicCards()).thenReturn(basicCards);
         when(gameDaoMock.getActiveCards()).thenReturn(new ArrayList<>());
 
-        ResponseEntity<Map<Player, Card>> response = gameController.assignCards();
+        ResponseEntity<String> response = gameController.startGame();
         assertEquals(HttpStatus.OK, response.getStatusCode());
-
-        Map<Player, Card> assignedCards = response.getBody();
-        assertEquals(6, assignedCards.size());
-        assertTrue(assignedCards.containsValue(CardConstants.PRESIDENT_CARD));
-        assertTrue(assignedCards.containsValue(CardConstants.BOMBER_CARD));
-        assertTrue(assignedCards.containsValue(CardConstants.RED_TEAM_CARD));
-        assertTrue(assignedCards.containsValue(CardConstants.BLUE_TEAM_CARD));
-        assertFalse(assignedCards.containsValue(CardConstants.GAMBLER_CARD));
     }
 }

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.elliott</groupId>
 	<artifactId>two-rooms-and-a-boom</artifactId>
-	<version>0.1.0</version>
+	<version>1.0.0</version>
 	<name>TwoRoomsAndABoom</name>
 	<description>Java SpringBoot application used to run the backend of instance of the card game Two Rooms and a Boom by Alan Gerding and Sean Mccoy</description>
 	<properties>
