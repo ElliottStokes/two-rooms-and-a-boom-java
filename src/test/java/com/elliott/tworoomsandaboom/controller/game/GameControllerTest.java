@@ -7,6 +7,7 @@ import com.elliott.tworoomsandaboom.card.Card;
 import com.elliott.tworoomsandaboom.dao.game.GameDAO;
 import com.elliott.tworoomsandaboom.dao.player.PlayerDAO;
 import com.elliott.tworoomsandaboom.game.GameOperations;
+import com.elliott.tworoomsandaboom.game.Room;
 import com.elliott.tworoomsandaboom.player.Player;
 import com.elliott.tworoomsandaboom.util.CardConstants;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,11 +20,8 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,7 +60,7 @@ public class GameControllerTest {
     }
 
     @Test
-    void shouldReturnOkStatusAndAssignedCardsOnAssignCardsEndpoint()
+    void shouldReturnOkStatusOnStartGameEndpoint()
     {
         Player[] players = new Player[]{
                 new Player(1, "testPlayer1"),
@@ -84,15 +82,17 @@ public class GameControllerTest {
         when(gameDaoMock.getBasicCards()).thenReturn(basicCards);
         when(gameDaoMock.getActiveCards()).thenReturn(new ArrayList<>());
 
-        ResponseEntity<Map<Player, Card>> response = gameController.assignCards();
+        ResponseEntity<String> response = gameController.startGame();
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
-        Map<Player, Card> assignedCards = response.getBody();
-        assertEquals(6, assignedCards.size());
-        assertTrue(assignedCards.containsValue(CardConstants.PRESIDENT_CARD));
-        assertTrue(assignedCards.containsValue(CardConstants.BOMBER_CARD));
-        assertTrue(assignedCards.containsValue(CardConstants.RED_TEAM_CARD));
-        assertTrue(assignedCards.containsValue(CardConstants.BLUE_TEAM_CARD));
-        assertFalse(assignedCards.containsValue(CardConstants.GAMBLER_CARD));
+    @Test
+    void shouldReturnOkStatusAndRoomOnGetRoomEndpoint()
+    {
+        when(gameDaoMock.getRoom(123)).thenReturn(Room.A);
+
+        ResponseEntity<Room> response = gameController.getRoom(123);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(Room.A, response.getBody());
     }
 }

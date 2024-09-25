@@ -60,4 +60,18 @@ public class GameOperations
         }
         return assignedCards;
     }
+
+    public Map<Player, Room> assignRooms(Player[] players) {
+        List<Player> unassignedPlayers = new ArrayList<>(List.of(players));
+        ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
+        Map<Player, Room> assignedRooms = new LinkedHashMap<>();
+
+        for (int playerIt = 0; playerIt < players.length; playerIt++)
+        {
+            int playerIndex = threadLocalRandom.nextInt(0, unassignedPlayers.size());
+            Room room = playerIt % 2 == 0 ? Room.A : Room.B;
+            assignedRooms.put(unassignedPlayers.remove(playerIndex), room);
+        }
+        return assignedRooms;
+    }
 }

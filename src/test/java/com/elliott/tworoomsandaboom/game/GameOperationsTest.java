@@ -198,6 +198,47 @@ class GameOperationsTest
         assertThrows(GameRuleException.class, () -> gameOperations.dealCards(players, basicCards, activeCards));
     }
 
+    @Test
+    void shouldAssignPlayersToRoomsEquallyWhenEvenNumberOfPlayers()
+    {
+        Player[] players = new Player[] {
+                new Player(1, "testPlayer1"),
+                new Player(2, "testPlayer2"),
+                new Player(3, "testPlayer3"),
+                new Player(4, "testPlayer4"),
+                new Player(5, "testPlayer5"),
+                new Player(6, "testPlayer6")
+        };
+
+        Map<Player, Room> assignedRooms = gameOperations.assignRooms(players);
+        int countRoomA = assignedRooms.values().stream().filter(room -> room.equals(Room.A)).toList().size();
+        int countRoomB = assignedRooms.values().stream().filter(room -> room.equals(Room.B)).toList().size();
+
+        assertEquals(3, countRoomA);
+        assertEquals(3, countRoomB);
+    }
+
+    @Test
+    void shouldAssignPlayersToRoomsOneExtraInAWhenOddNumberOfPlayers()
+    {
+        Player[] players = new Player[] {
+                new Player(1, "testPlayer1"),
+                new Player(2, "testPlayer2"),
+                new Player(3, "testPlayer3"),
+                new Player(4, "testPlayer4"),
+                new Player(5, "testPlayer5"),
+                new Player(6, "testPlayer6"),
+                new Player(7, "testPlayer7")
+        };
+
+        Map<Player, Room> assignedRooms = gameOperations.assignRooms(players);
+        int countRoomA = assignedRooms.values().stream().filter(room -> room.equals(Room.A)).toList().size();
+        int countRoomB = assignedRooms.values().stream().filter(room -> room.equals(Room.B)).toList().size();
+
+        assertEquals(4, countRoomA);
+        assertEquals(3, countRoomB);
+    }
+
     private long countCards(Map<Player, Card> assignedCards, Card card)
     {
         return assignedCards.entrySet()

@@ -3,7 +3,8 @@ package com.elliott.tworoomsandaboom.dao.game;
 import com.elliott.tworoomsandaboom.card.*;
 import com.elliott.tworoomsandaboom.db.DatabaseConnectionManager;
 import com.elliott.tworoomsandaboom.error.DatabaseException;
-import com.elliott.tworoomsandaboom.player.Player;
+import com.elliott.tworoomsandaboom.game.Room;
+import com.elliott.tworoomsandaboom.player.AssignedPlayer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -22,12 +22,12 @@ public class GameDAO {
     private static final String SET_ACTIVE_CARDS_BY_TITLE = "UPDATE card SET isActive = 1 WHERE cardTitle IN (%s);";
     private static final String SET_ACTIVE_CARDS_BY_ID = "UPDATE card SET isActive = 1 WHERE cardId IN (%s);";
     private static final String RESET_ACTIVE_CARDS = "UPDATE card SET isActive = 0 WHERE isActive = 1 AND isBasic = 0;";
-    private static final String ADD_ASSIGNED_CARDS = "INSERT INTO game (playerId, cardId) VALUES %s;";
+    private static final String ADD_ASSIGNED_PLAYERS = "INSERT INTO game (playerId, cardId, room) VALUES %s;";
     private static final String CLEAR_ASSIGNED_CARDS = "DELETE FROM game";
     private static final String GET_ACTIVE_CARDS = "SELECT cardId, teamId, cardTitle FROM card WHERE isActive = 1 AND isBasic = 0;";
     private static final String GET_BASIC_CARDS = "SELECT cardId, teamId, cardTitle FROM card WHERE isActive = 1 AND isBasic = 1;";
     private static final String GET_CARD_BY_NAME_AND_TEAM = "SELECT c.cardId, c.cardTitle, t.teamId, c.isActive FROM card c LEFT JOIN team t ON c.teamId = t.teamId WHERE c.cardTitle = ? AND t.colour = ?;";
-
+    private static final String SELECT_ROOM_BY_PLAYER_ID = "SELECT room FROM game WHERE playerId = ?";
 
     private final DatabaseConnectionManager databaseConnectionManager;
 
@@ -146,26 +146,37 @@ public class GameDAO {
         }
     }
 
-    public void saveAssignedCards(Map<Player, Card> assignedCards)
-    {
+    public void saveAssignedPlayers(List<AssignedPlayer> assignedPlayers) {
         this.clearAssignedCards();
 
-        StringBuilder assignedCardIds = new StringBuilder();
-        for (Map.Entry<Player, Card> assignedCard : assignedCards.entrySet())
-        {
-            assignedCardIds.append("(")
-                    .append(assignedCard.getKey().getPlayerId())
-                    .append(", ")
-                    .append(assignedCard.getValue().getCardId())
-                    .append("),");
+        StringBuilder assignedPlayerStrings = new StringBuilder();
+        for (AssignedPlayer assignedPlayer : assignedPlayers) {
+            assignedPlayerStrings.append(assignedPlayer.toDatabaseInputString()).append(',');
         }
-        log.info(assignedCardIds.substring(0, assignedCardIds.length()-1));
-        String addAssignedCardsFormatted = String.format(ADD_ASSIGNED_CARDS, assignedCardIds.substring(0, assignedCardIds.length()-1));
+        String addAssignedPlayersFormatted =
+            String.format(ADD_ASSIGNED_PLAYERS, assignedPlayerStrings.substring(0, assignedPlayerStrings.length()-1));
         try (Connection connection = databaseConnectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(addAssignedCardsFormatted))
+             PreparedStatement statement = connection.prepareStatement(addAssignedPlayersFormatted))
         {
             statement.execute();
-            log.info("!GAME CARDS HAVE BEEN ASSIGNED!");
+            log.info("!PLAYERS HAVE BEEN ASSIGNED A CARD AND A STARTING ROOM!");
+        }
+        catch (SQLException e)
+        {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
+    public Room getRoom(int playerId) {
+        try (Connection connection = databaseConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_ROOM_BY_PLAYER_ID))
+        {
+            statement.setInt(1, playerId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next())
+                return Room.valueOf(resultSet.getString("room"));
+            else
+                throw new DatabaseException("No room found");
         }
         catch (SQLException e)
         {

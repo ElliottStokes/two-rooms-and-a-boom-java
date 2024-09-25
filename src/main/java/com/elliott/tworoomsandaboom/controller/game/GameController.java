@@ -7,6 +7,8 @@ import com.elliott.tworoomsandaboom.card.Card;
 import com.elliott.tworoomsandaboom.dao.game.GameDAO;
 import com.elliott.tworoomsandaboom.game.GameOperations;
 import com.elliott.tworoomsandaboom.dao.player.PlayerDAO;
+import com.elliott.tworoomsandaboom.game.Room;
+import com.elliott.tworoomsandaboom.player.AssignedPlayer;
 import com.elliott.tworoomsandaboom.player.Player;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -67,16 +70,38 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body("");
     }
 
-    @GetMapping("/assignCards")
-    public ResponseEntity<Map<Player, Card>> assignCards()
+    @GetMapping("/startGame")
+    public ResponseEntity<String> startGame()
     {
+        log.info("Starting new Game");
         Player[] players = playerDAO.getPlayers();
         BasicCards basicCards = gameDAO.getBasicCards();
         List<Card> activeCards = gameDAO.getActiveCards();
         Map<Player, Card> assignedCards = gameOperations.dealCards(players, basicCards, activeCards);
-        log.info("Assigned cards: {}", assignedCards);
-        gameDAO.saveAssignedCards(assignedCards);
-        return ResponseEntity.ok(assignedCards);
+        Map<Player, Room> assignedRooms = gameOperations.assignRooms(players);
+        List<AssignedPlayer> assignedPlayers = new ArrayList<>();
+        Arrays.stream(players).forEach(
+            player -> assignedPlayers.add(
+                new AssignedPlayer(
+                    player,
+                    assignedCards.get(player),
+                    assignedRooms.get(player)
+                )
+            )
+        );
+        gameDAO.saveAssignedPlayers(assignedPlayers);
+        return ResponseEntity.ok().body("");
+    }
+
+    @GetMapping("/room")
+    public ResponseEntity<Room> getRoom(
+            @RequestParam("playerId")
+            int playerId
+    )
+    {
+        log.info("Get Room: {}", playerId);
+        Room room = gameDAO.getRoom(playerId);
+        return ResponseEntity.ok().body(room);
     }
 
     @GetMapping("/endGame")
