@@ -93,6 +93,17 @@ public class GameController {
         return ResponseEntity.ok().body("");
     }
 
+    @GetMapping("/room")
+    public ResponseEntity<Room> getRoom(
+            @RequestParam("playerId")
+            int playerId
+    )
+    {
+        log.info("Get Room: {}", playerId);
+        Room room = gameDAO.getRoom(playerId);
+        return ResponseEntity.ok().body(room);
+    }
+
     @GetMapping("/endGame")
     public ResponseEntity<String> endGame()
     {

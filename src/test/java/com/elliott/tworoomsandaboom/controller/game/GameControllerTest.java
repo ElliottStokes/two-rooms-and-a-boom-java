@@ -7,6 +7,7 @@ import com.elliott.tworoomsandaboom.card.Card;
 import com.elliott.tworoomsandaboom.dao.game.GameDAO;
 import com.elliott.tworoomsandaboom.dao.player.PlayerDAO;
 import com.elliott.tworoomsandaboom.game.GameOperations;
+import com.elliott.tworoomsandaboom.game.Room;
 import com.elliott.tworoomsandaboom.player.Player;
 import com.elliott.tworoomsandaboom.util.CardConstants;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,5 +84,15 @@ public class GameControllerTest {
 
         ResponseEntity<String> response = gameController.startGame();
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void shouldReturnOkStatusAndRoomOnGetRoomEndpoint()
+    {
+        when(gameDaoMock.getRoom(123)).thenReturn(Room.A);
+
+        ResponseEntity<Room> response = gameController.getRoom(123);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(Room.A, response.getBody());
     }
 }

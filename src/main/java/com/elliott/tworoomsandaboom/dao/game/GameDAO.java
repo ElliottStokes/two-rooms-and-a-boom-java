@@ -3,6 +3,7 @@ package com.elliott.tworoomsandaboom.dao.game;
 import com.elliott.tworoomsandaboom.card.*;
 import com.elliott.tworoomsandaboom.db.DatabaseConnectionManager;
 import com.elliott.tworoomsandaboom.error.DatabaseException;
+import com.elliott.tworoomsandaboom.game.Room;
 import com.elliott.tworoomsandaboom.player.AssignedPlayer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class GameDAO {
     private static final String GET_ACTIVE_CARDS = "SELECT cardId, teamId, cardTitle FROM card WHERE isActive = 1 AND isBasic = 0;";
     private static final String GET_BASIC_CARDS = "SELECT cardId, teamId, cardTitle FROM card WHERE isActive = 1 AND isBasic = 1;";
     private static final String GET_CARD_BY_NAME_AND_TEAM = "SELECT c.cardId, c.cardTitle, t.teamId, c.isActive FROM card c LEFT JOIN team t ON c.teamId = t.teamId WHERE c.cardTitle = ? AND t.colour = ?;";
-
+    private static final String SELECT_ROOM_BY_PLAYER_ID = "SELECT room FROM game WHERE playerId = ?";
 
     private final DatabaseConnectionManager databaseConnectionManager;
 
@@ -159,6 +160,23 @@ public class GameDAO {
         {
             statement.execute();
             log.info("!PLAYERS HAVE BEEN ASSIGNED A CARD AND A STARTING ROOM!");
+        }
+        catch (SQLException e)
+        {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
+    public Room getRoom(int playerId) {
+        try (Connection connection = databaseConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_ROOM_BY_PLAYER_ID))
+        {
+            statement.setInt(1, playerId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next())
+                return Room.valueOf(resultSet.getString("room"));
+            else
+                throw new DatabaseException("No room found");
         }
         catch (SQLException e)
         {
