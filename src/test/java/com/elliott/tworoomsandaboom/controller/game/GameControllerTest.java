@@ -87,6 +87,29 @@ public class GameControllerTest {
     }
 
     @Test
+    void shouldReturnOkStatusOnRevealCardsEndpoint()
+    {
+        ResponseEntity<String> response = gameController.revealCards(1);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void shouldReturnOkStatusOnEndGameEndpoint()
+    {
+        ResponseEntity<String> response = gameController.endGame(1);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void shouldReturnGameStatesOnGetGameStateEndpoint()
+    {
+        when(gameDaoMock.getGameState(1)).thenReturn(GameState.WAITING_FOR_HOST);
+        ResponseEntity<String> response = gameController.getGameState(1);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(GameState.WAITING_FOR_HOST, GameState.valueOf(response.getBody()));
+    }
+
+    @Test
     void shouldReturnOkStatusAndRoomOnGetRoomEndpoint()
     {
         when(gameDaoMock.getRoom(123)).thenReturn(Room.A);
