@@ -70,27 +70,24 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body("");
     }
 
-    @GetMapping("/startGame")
-    public ResponseEntity<String> startGame()
+    @GetMapping("/state")
+    public ResponseEntity<String> getGameState(
+            @RequestParam("gameId")
+            int gameId
+    )
     {
-        log.info("Starting new Game");
-        Player[] players = playerDAO.getPlayers();
-        BasicCards basicCards = gameDAO.getBasicCards();
-        List<Card> activeCards = gameDAO.getActiveCards();
-        Map<Player, Card> assignedCards = gameOperations.dealCards(players, basicCards, activeCards);
-        Map<Player, Room> assignedRooms = gameOperations.assignRooms(players);
-        List<AssignedPlayer> assignedPlayers = new ArrayList<>();
-        Arrays.stream(players).forEach(
-            player -> assignedPlayers.add(
-                new AssignedPlayer(
-                    player,
-                    assignedCards.get(player),
-                    assignedRooms.get(player)
-                )
-            )
-        );
-        gameDAO.saveAssignedPlayers(assignedPlayers);
-        return ResponseEntity.ok().body("");
+        GameState gameState = gameDAO.getGameState(gameId);
+        return ResponseEntity.ok().body(gameState.toString());
+    }
+
+    @GetMapping("/revealTime")
+    public ResponseEntity<String> getRevealTime(
+            @RequestParam("gameId")
+            int gameId
+    )
+    {
+        String revealTime = gameDAO.getRevealTime(gameId);
+        return ResponseEntity.ok().body(revealTime);
     }
 
     @GetMapping("/room")
@@ -104,11 +101,53 @@ public class GameController {
         return ResponseEntity.ok().body(room);
     }
 
+    @GetMapping("/startGame")
+    public ResponseEntity<String> startGame()
+    {
+        // When multiple games can be played at once, this will need to be updated
+        // possibly by passing in a game ID as a URL parameter
+        int gameId = 1;
+        Player[] players = playerDAO.getPlayers();
+        BasicCards basicCards = gameDAO.getBasicCards();
+        List<Card> activeCards = gameDAO.getActiveCards();
+        Map<Player, Card> assignedCards = gameOperations.dealCards(players, basicCards, activeCards);
+        Map<Player, Room> assignedRooms = gameOperations.assignRooms(players);
+        List<AssignedPlayer> assignedPlayers = new ArrayList<>();
+        Arrays.stream(players).forEach(
+            player -> assignedPlayers.add(
+                new AssignedPlayer(
+                    gameId,
+                    player,
+                    assignedCards.get(player),
+                    assignedRooms.get(player)
+                )
+            )
+        );
+        gameDAO.saveAssignedPlayers(assignedPlayers);
+        gameDAO.setGameState(GameState.IN_PROGRESS, gameId);
+        return ResponseEntity.ok().body("");
+    }
+
+    @GetMapping("/revealCards")
+    public ResponseEntity<String> revealCards(
+        @RequestParam("gameId")
+        int gameId
+    )
+    {
+        gameDAO.setGameState(GameState.REVEAL_CARDS, gameId);
+        gameDAO.setRevealTime(gameId);
+        return ResponseEntity.ok().body("");
+    }
+
     @GetMapping("/endGame")
-    public ResponseEntity<String> endGame()
+    public ResponseEntity<String> endGame(
+        @RequestParam("gameId")
+        int gameId
+    )
     {
         log.info("Ending Game");
-        gameDAO.clearAssignedCards();
+        gameDAO.clearAssignedPlayers(gameId);
+        gameDAO.setGameState(GameState.WAITING_FOR_HOST, gameId);
         return ResponseEntity.ok().body("");
     }
 }

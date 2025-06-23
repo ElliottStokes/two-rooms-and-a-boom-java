@@ -12,13 +12,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AssignedPlayer {
+    private int gameId;
     private Player player;
     private Card card;
     private Room room;
 
     public String toDatabaseInputString()
     {
-        return String.format("(%d,%d,'%s')",
+        return String.format("(%d,%d,%d,'%s')",
+                this.gameId,
                 this.player.getPlayerId(),
                 this.card.getCardId(),
                 this.room.toString()
